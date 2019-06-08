@@ -13,7 +13,7 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 Shopping_List = namedtuple("ShoppingList", ["item_name", "item_price", "item_url"])
 
 
-class MakroBot(object):
+class MakroBot:
     """
         Selenium bot that searches makro website for items defined in a file and gets the
         price, name and url, in order to create a Google spreadsheet.
@@ -99,12 +99,13 @@ class MakroBot(object):
             finally:
                 first_res = self.driver.find_element_by_xpath(first_result_xpath)
                 first_res.click()
+
+            name = self.get_product_name()
+            price = self.get_product_price()
             current_url = self.driver.current_url
             if "/p/" in current_url:
                 current_url = self.makro_url + "p/" + current_url.split("/p/")[-1]
 
-            name = self.get_product_name()
-            price = self.get_product_price()
             shopping_list.append(
                 Shopping_List(
                     item_name=name.title(), item_price=price, item_url=current_url
@@ -128,13 +129,15 @@ class MakroBot(object):
             ).text
 
         try:
-            price = price.split("\n")[0] if "\n" in price else "Not available"
-            price = re.sub("\D", "", price)
+            price = (
+                re.sub("\D", "", price.split("\n")[0])
+                if "\n" in price
+                else "Not available"
+            )
+            return "ZAR %.2f" % (float(price) / 100)
         except Exception as err:
             print(f"Failed to retrieve price: {err}")
             return "Not available"
-        else:
-            return "ZAR %.2f" % (float(price) / 100)
 
     def get_product_name(self):
         """Returns the product item name on the makro page."""
