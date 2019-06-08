@@ -10,9 +10,10 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 
 
 class MakroBot(object):
-    """Parses relevant information from a text file consisting of
-    makro links."""
-
+    """
+        Selenium bot that searches makro website for items defined in a file and gets the
+        price, name and url, in order to create a Google spreadsheet.
+    """
     def __init__(self, items, timeout=60):
         """Setup bot for makro URL."""
         self.makro_url = "https://www.makro.co.za/"
@@ -21,7 +22,7 @@ class MakroBot(object):
 
         # self.profile = webdriver.FirefoxProfile()
         self.options = Options()
-        self.options.headless = True
+        # self.options.headless = True
 
         self.driver = webdriver.Firefox(
             # firefox_profile=self.profile,
@@ -31,18 +32,13 @@ class MakroBot(object):
 
         # Navigate to the makro URL.
         try:
-            print("Navigating to %s" % self.makro_url)
+            print(f"Navigating to {self.makro_url}")
             self.driver.get(self.makro_url)
         except TimeoutException:
             print("Timeout loading page")
             self.close_session()
         if self.options.headless:
             print("Headless Firefox Initialized")
-
-        # # Obtain the source
-        # self.html = self.driver.page_source
-        # self.soup = BeautifulSoup(self.html, 'html.parser')
-        # self.html = self.soup.prettify('utf-8')
 
     def search_items(self):
         """Searches through the list of items obtained from spreadsheet and
@@ -150,7 +146,8 @@ class MakroBot(object):
 
 
 if __name__ == "__main__":
-    items = ["pampers", "golden cloud flour", "jungle oats"]
+
+    items = ["pampers", "golden cloud self raising flour", "jungle oats"]
     try:
         makro = MakroBot(items)
         makro.search_items()
