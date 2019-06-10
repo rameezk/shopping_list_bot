@@ -54,6 +54,15 @@ ids = {
         "search_input_id": "fldSearch",
         "url_shortner_pattern": "/_/",
     },
+    "takealot": {
+        "first_result_xpath": '//*[@id="pos_link_0"]',
+        "price_product": "sf-price",
+        "price_promotion": "sf-price",
+        "product_name": "product-title",
+        "search_button_xpath": "/html/body/div[3]/div/div[2]/form/fieldset/input[5]",
+        "search_input_id": "search",
+        "url_shortner_pattern": "/",
+    },
 }
 
 
@@ -226,8 +235,8 @@ class ShoppingBot(WebDriver, LoggingClass):
 
         try:
             price = re.sub("\D", "", price.split("\n")[0]) if "R" in price else price
-            time.sleep(0.5)
-            return price if "R" and "." in price else "R%.2f" % ((float(price) / 100))
+            time.sleep(0.2)
+            return price if "R" and "." in price else "R%.2f" % float(price)
         except Exception:
             self.logger.exception(
                 f"Failed to retrieve price for {self.item} on {self.url}"
@@ -263,6 +272,7 @@ if __name__ == "__main__":
         "https://www.game.co.za/",
         "https://www.pnp.co.za/",
         "https://www.woolworths.co.za/",
+        "https://www.takealot.com/",
     ]
 
     for url in urls:
