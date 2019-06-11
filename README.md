@@ -1,7 +1,7 @@
-# "makro_automated_shopping_list"
+# Shopping List Bot
 
-[![Build Status](https://travis-ci.com/{{USERNAME}}/makro_automated_shopping_list.svg?branch=master)](https://travis-ci.com/{{USERNAME}}/makro_automated_shopping_list)
-![GitHub](https://img.shields.io/github/license/{{USERNAME}}/makro_automated_shopping_list.svg)
+[![Build Status](https://travis-ci.com/{{USERNAME}}/ShoppingListBot.svg?branch=master)](https://travis-ci.com/{{USERNAME}}/ShoppingListBot)
+![GitHub](https://img.shields.io/github/license/{{USERNAME}}/ShoppingListBot.svg)
 
 ## {{ STORY GOES HERE}}
 

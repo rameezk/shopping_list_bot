@@ -212,7 +212,6 @@ class ShoppingBot(WebDriver, LoggingClass):
                 assert len(shopping_list) != 0 and isinstance(shopping_list, list)
             except Exception:
                 self.logger.error("No Data Available")
-                return
 
         self.close_session()
         return shopping_list
@@ -236,7 +235,7 @@ class ShoppingBot(WebDriver, LoggingClass):
         try:
             price = re.sub("\D", "", price.split("\n")[0]) if "R" in price else price
             time.sleep(0.2)
-            return price if "R" and "." in price else "R%.2f" % float(price)
+            return price if "R" or "." in price else "R%.2f" % (float(price) / 100)
         except Exception:
             self.logger.exception(
                 f"Failed to retrieve price for {self.item} on {self.url}"
@@ -247,15 +246,15 @@ class ShoppingBot(WebDriver, LoggingClass):
         """Returns the product item name on the makro page."""
         product_name = None
         try:
+            product_name = self.driver.title.split("|")[0].strip()
+            assert isinstance(product_name, str) and product_name != ""
+        except Exception:
             product_name = self.driver.find_element_by_class_name(
                 self.ids[self.url.split(".")[1]]["product_name"]
             ).text.split("\n")[0]
-            assert isinstance(product_name, str) and product_name != ""
-        except Exception:
-            self.logger.error("Failed to get item name from class, getting from title")
-            product_name = self.driver.title.split("|")[0].strip()
 
         if not product_name:
+            self.logger.error("Failed to get item name from class, and title")
             product_name = "Not Available"
         return product_name
 
@@ -266,6 +265,18 @@ class ShoppingBot(WebDriver, LoggingClass):
 
 if __name__ == "__main__":
 
+    class TimeTaken:
+        def __init__(self, func):
+            self.func = func
+            print(f"Time decorator for {self.func.__name__} created")
+
+        def __call__(self):
+            start = time.time()
+            result = self.func(*args, **kwargs)
+            duration = time.time() - start
+            print(f"Duration of {self.func.__name__} function call was {duration}.")
+            return result
+
     items = ["pampers pants", "golden cloud self raising flour", "jungle oats 1kg"]
     urls = [
         "https://www.makro.co.za/",
@@ -275,10 +286,14 @@ if __name__ == "__main__":
         "https://www.takealot.com/",
     ]
 
+    @TimeTaken
+    def get_search_items(shopping_bot):
+        return shopping_bot.search_items()
+
     for url in urls:
         try:
             shopping_bot = ShoppingBot(items, url, ids, "INFO")
-            shopping_list = shopping_bot.search_items()
+            shopping_list = get_search_items(shopping_bot)
         except Exception:
             shopping_bot.close_session()
         else:
