@@ -1,7 +1,7 @@
 # Shopping List Bot
 
-[![Build Status](https://travis-ci.com/{{USERNAME}}/ShoppingListBot.svg?branch=master)](https://travis-ci.com/{{USERNAME}}/ShoppingListBot)
-![GitHub](https://img.shields.io/github/license/{{USERNAME}}/ShoppingListBot.svg)
+[![Build Status](https://travis-ci.com/mmphego/shopping_list_bot.svg?branch=master)](https://travis-ci.com/mmphego/shopping_list_bot)
+![GitHub](https://img.shields.io/github/license/mmphego/shopping_list_bot.svg)
 
 ## {{ STORY GOES HERE}}
 
@@ -17,7 +17,7 @@ python setup.py install
 
 ## Oh, Thanks!
 
-By the way... Click if you'd like to [say thanks](https://saythanks.io/to/{{USERNAME}})... :) else *Star* it.
+By the way... Click if you'd like to [say thanks](https://saythanks.io/to/mmphego)... :) else *Star* it.
 
 ✨🍰✨
 
