@@ -14,9 +14,11 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
-Shopping_List = namedtuple("ShoppingList", ["item_name", "item_price", "item_url"])
+Shopping_List = namedtuple(
+    "ShoppingList", ["shop_name", "item_name", "item_price", "item_url"]
+)
 
-TIMEOUT = 60
+TIMEOUT = 30
 ids = {
     "makro": {
         "first_result_xpath": "/html/body/main/div[9]/div[3]/div/div[1]/div[3]/div[2]/div/div/div[2]/div[1]",
@@ -78,11 +80,11 @@ class LoggingClass:
         return logging.getLogger(name)
 
 
-class WebDriver:
+class WebDriverSetup:
     def __init__(self):
         self._timeout = TIMEOUT
         self._options = Options()
-        self._options.headless = True
+        self._options.headless = False
         self._profile = self._disable_Images_Firefox_Profile()
 
         self.driver = webdriver.Firefox(
@@ -119,7 +121,7 @@ class WebDriver:
         return firefoxProfile
 
 
-class ShoppingBot(WebDriver, LoggingClass):
+class ShoppingBot(WebDriverSetup, LoggingClass):
     """
         Selenium bot that searches makro website for items defined in a file and gets the
         price, name and url, in order to create a Google spreadsheet.
@@ -172,30 +174,30 @@ class ShoppingBot(WebDriver, LoggingClass):
                 search_button = self.driver.find_element_by_xpath(search_button_xpath)
                 search_button.click()
 
+            # try:
+            #     test_price = self.driver.find_element_by_class_name(
+            #         self.ids[self.url.split(".")[1]]["price_promotion"]
+            #     ).text
+            #     assert test_price != "" and "R" in test_price
+            #     self.logger.debug(
+            #         "Redirected to page with price, "
+            #         "no need to select first search result page"
+            #     )
+            # except Exception:
             try:
-                test_price = self.driver.find_element_by_class_name(
-                    self.ids[self.url.split(".")[1]]["price_promotion"]
-                ).text
-                assert test_price != "" and "R" in test_price
-                self.logger.debug(
-                    "Redirected to page with price, "
-                    "no need to select first search result page"
+                self.logger.debug("Selecting first result and open link, using xpath")
+                first_result_xpath = self.ids[self.url.split(".")[1]][
+                    "first_result_xpath"
+                ]
+                first_res = WebDriverWait(self.driver, self._timeout).until(
+                    EC.presence_of_element_located((By.XPATH, first_result_xpath))
                 )
             except Exception:
-                try:
-                    self.logger.debug("Selecting first result and open link, using xpath")
-                    first_result_xpath = self.ids[self.url.split(".")[1]][
-                        "first_result_xpath"
-                    ]
-                    first_res = WebDriverWait(self.driver, self._timeout).until(
-                        EC.presence_of_element_located((By.XPATH, first_result_xpath))
-                    )
-                except Exception:
-                    self.logger.error("No Data Available")
-                else:
-                    time.sleep(0.5)
-                    first_res = self.driver.find_element_by_xpath(first_result_xpath)
-                    first_res.click()
+                self.logger.error("No Data Available")
+            else:
+                time.sleep(0.5)
+                first_res = self.driver.find_element_by_xpath(first_result_xpath)
+                first_res.click()
 
             try:
                 name = self.get_product_name()
@@ -206,7 +208,10 @@ class ShoppingBot(WebDriver, LoggingClass):
 
                 shopping_list.append(
                     Shopping_List(
-                        item_name=name.title(), item_price=price, item_url=current_url
+                        shop_name=self.url.split(".")[1],
+                        item_name=name.title(),
+                        item_price=price,
+                        item_url=current_url,
                     )
                 )
                 assert len(shopping_list) != 0 and isinstance(shopping_list, list)
@@ -233,9 +238,23 @@ class ShoppingBot(WebDriver, LoggingClass):
             ).text
 
         try:
-            price = re.sub("\D", "", price.split("\n")[0]) if "R" in price else price
             time.sleep(0.2)
-            return price if "R" or "." in price else "R%.2f" % (float(price) / 100)
+            if "takealot" in self.url.split(".")[1]:
+                return price.split('R')[-1]
+            elif "woolworths" in self.url.split(".")[1]:
+                return price.split('R')[-1].strip()
+            elif "makro" in self.url.split(".")[1]:
+                price = re.sub("\D", "", price.split("\n")[0]) if "R" in price else price
+                return "%.2f" % (float(price) / 100)
+            elif "pnp" in self.url.split(".")[1]:
+                return "%.2f" % (float(price) / 100)
+                import IPython; globals().update(locals()); IPython.embed(header='makro')
+            else:
+                return (
+                    price
+                    if ("R" in price or "." in price)
+                    else "R%.2f" % (float(price) / 100)
+                )
         except Exception:
             self.logger.exception(
                 f"Failed to retrieve price for {self.item} on {self.url}"
@@ -245,6 +264,12 @@ class ShoppingBot(WebDriver, LoggingClass):
     def get_product_name(self):
         """Returns the product item name on the makro page."""
         product_name = None
+        if "makro" in self.url.split(".")[1]:
+            import IPython
+
+            globals().update(locals())
+            IPython.embed(header="name")
+
         try:
             product_name = self.driver.title.split("|")[0].strip()
             assert isinstance(product_name, str) and product_name != ""
@@ -253,8 +278,9 @@ class ShoppingBot(WebDriver, LoggingClass):
                 self.ids[self.url.split(".")[1]]["product_name"]
             ).text.split("\n")[0]
 
-        if not product_name:
+        if (not product_name) or (self.item not in product_name.lower()) or (product_name.lower() in self.driver.current_url):
             self.logger.error("Failed to get item name from class, and title")
+            import IPython; globals().update(locals()); IPython.embed(header='Python Debugger')
             product_name = "Not Available"
         return product_name
 
@@ -265,19 +291,7 @@ class ShoppingBot(WebDriver, LoggingClass):
 
 if __name__ == "__main__":
 
-    class TimeTaken:
-        def __init__(self, func):
-            self.func = func
-            print(f"Time decorator for {self.func.__name__} created")
-
-        def __call__(self):
-            start = time.time()
-            result = self.func(*args, **kwargs)
-            duration = time.time() - start
-            print(f"Duration of {self.func.__name__} function call was {duration}.")
-            return result
-
-    items = ["pampers pants", "golden cloud self raising flour", "jungle oats 1kg"]
+    items = ["pampers pants", "self raising flour", "jungle oats 1kg"]
     urls = [
         "https://www.makro.co.za/",
         "https://www.game.co.za/",
@@ -286,14 +300,10 @@ if __name__ == "__main__":
         "https://www.takealot.com/",
     ]
 
-    @TimeTaken
-    def get_search_items(shopping_bot):
-        return shopping_bot.search_items()
-
     for url in urls:
         try:
             shopping_bot = ShoppingBot(items, url, ids, "INFO")
-            shopping_list = get_search_items(shopping_bot)
+            shopping_list = shopping_bot.search_items()
         except Exception:
             shopping_bot.close_session()
         else:
