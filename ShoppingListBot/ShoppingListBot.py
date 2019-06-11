@@ -28,6 +28,7 @@ ids = {
         "search_button_xpath": "/html/body/main/div[2]/div/div[2]/div/div/div[4]/div/div/div/div/div[2]/div/form/span[2]/a/i",
         "search_input_id": "js-site-search-input",
         "url_shortner_pattern": "/p/",
+        "url_shortner_linker": "",
     },
     "game": {
         "first_result_xpath": "/html/body/main/div[3]/div[2]/div[2]/div/div/div/ul/div[1]/a/div",
@@ -37,6 +38,7 @@ ids = {
         "search_button_xpath": "/html/body/main/header/nav[1]/div/div[2]/div[2]/div/div/div/form/div/span/button",
         "search_input_id": "js-site-search-input",
         "url_shortner_pattern": "/p/",
+        "url_shortner_linker": "",
     },
     "pnp": {
         "first_result_xpath": "/html/body/main/div[4]/div[2]/div/div[1]/div[3]/div[2]/div[2]/div[1]/ul/div[1]/div/div[3]/a/div[1]",
@@ -46,15 +48,17 @@ ids = {
         "search_button_xpath": "/html/body/main/header/div[1]/div[2]/div/div[7]/div/form/div/span/button/span",
         "search_input_id": "js-site-search-input",
         "url_shortner_pattern": "/p/",
+        "url_shortner_linker": "",
     },
     "woolworths": {
-        "first_result_xpath": "/html/body/div/div/div/main/div/div/div/div[1]/div[2]/div[3]/div[1]/article/div[2]/a/h2",
+        "first_result_xpath": "/html/body/div/div/div/main/div/div/div/div[1]/div[1]/div[3]/div[1]/article/div[2]/a/h2",
         "price_product": "price",
         "price_promotion": "price",
         "product_name": "ffont-graphic heading--400 heading--sub no-wrap--ellipsis",
         "search_button_xpath": "/html/body/div/div/header/div[2]/div/section[3]/div/div/form/input[3]",
         "search_input_id": "fldSearch",
-        "url_shortner_pattern": "/_/",
+        "url_shortner_pattern": "_/",
+        "url_shortner_linker": "prod/",
     },
     "takealot": {
         "first_result_xpath": '//*[@id="pos_link_0"]',
@@ -64,6 +68,7 @@ ids = {
         "search_button_xpath": "/html/body/div[3]/div/div[2]/form/fieldset/input[5]",
         "search_input_id": "search",
         "url_shortner_pattern": "/",
+        "url_shortner_linker": "",
     },
 }
 
@@ -84,7 +89,7 @@ class WebDriverSetup:
     def __init__(self):
         self._timeout = TIMEOUT
         self._options = Options()
-        self._options.headless = False
+        self._options.headless = True
         self._profile = self._disable_Images_Firefox_Profile()
 
         self.driver = webdriver.Firefox(
@@ -145,6 +150,7 @@ class ShoppingBot(WebDriverSetup, LoggingClass):
         shopping_list = []
         for count, self.item in enumerate(self.items, 1):
             self.driver.get(self.url)
+            time.sleep(0.3)
             self.logger.info(
                 f"Searching on url: {self.url} for item #{count}: {self.item}..."
             )
@@ -173,17 +179,8 @@ class ShoppingBot(WebDriverSetup, LoggingClass):
             else:
                 search_button = self.driver.find_element_by_xpath(search_button_xpath)
                 search_button.click()
+                time.sleep(0.5)
 
-            # try:
-            #     test_price = self.driver.find_element_by_class_name(
-            #         self.ids[self.url.split(".")[1]]["price_promotion"]
-            #     ).text
-            #     assert test_price != "" and "R" in test_price
-            #     self.logger.debug(
-            #         "Redirected to page with price, "
-            #         "no need to select first search result page"
-            #     )
-            # except Exception:
             try:
                 self.logger.debug("Selecting first result and open link, using xpath")
                 first_result_xpath = self.ids[self.url.split(".")[1]][
@@ -195,31 +192,40 @@ class ShoppingBot(WebDriverSetup, LoggingClass):
             except Exception:
                 self.logger.error("No Data Available")
             else:
-                time.sleep(0.5)
                 first_res = self.driver.find_element_by_xpath(first_result_xpath)
                 first_res.click()
+                time.sleep(0.5)
 
             try:
                 name = self.get_product_name()
                 price = self.get_product_price()
-                current_url = self.driver.current_url
-                if "/p/" in current_url:
-                    current_url = self.url + "p/" + current_url.split("/p/")[-1]
+                current_url = self.get_current_url()
 
-                shopping_list.append(
-                    Shopping_List(
-                        shop_name=self.url.split(".")[1],
-                        item_name=name.title(),
-                        item_price=price,
-                        item_url=current_url,
+                if name != "Not Available":
+                    shopping_list.append(
+                        Shopping_List(
+                            shop_name=self.url.split(".")[1],
+                            item_name=name.title(),
+                            item_price=price,
+                            item_url=current_url,
+                        )
                     )
-                )
-                assert len(shopping_list) != 0 and isinstance(shopping_list, list)
+                    assert len(shopping_list) != 0 and isinstance(shopping_list, list)
             except Exception:
                 self.logger.error("No Data Available")
 
         self.close_session()
         return shopping_list
+
+    def get_current_url(self):
+        current_url = self.driver.current_url
+        url_pattern = self.ids[self.url.split(".")[1]]["url_shortner_pattern"]
+        linker = self.ids[self.url.split(".")[1]]["url_shortner_linker"]
+        if url_pattern in current_url:
+            current_url = (
+                self.url + linker + url_pattern + current_url.split(url_pattern)[-1]
+            )
+        return current_url
 
     def get_product_price(self):
         """Gets and cleans product item price on the makro page."""
@@ -240,21 +246,17 @@ class ShoppingBot(WebDriverSetup, LoggingClass):
         try:
             time.sleep(0.2)
             if "takealot" in self.url.split(".")[1]:
-                return price.split('R')[-1]
+                return price.split("R")[-1]
             elif "woolworths" in self.url.split(".")[1]:
-                return price.split('R')[-1].strip()
+                return price.split("R")[-1].strip()
             elif "makro" in self.url.split(".")[1]:
                 price = re.sub("\D", "", price.split("\n")[0]) if "R" in price else price
                 return "%.2f" % (float(price) / 100)
             elif "pnp" in self.url.split(".")[1]:
-                return "%.2f" % (float(price) / 100)
-                import IPython; globals().update(locals()); IPython.embed(header='makro')
-            else:
-                return (
-                    price
-                    if ("R" in price or "." in price)
-                    else "R%.2f" % (float(price) / 100)
-                )
+                return "%.2f" % (float(price.split("R")[-1]) / 100)
+            elif "game":
+                price = re.sub("\D", "", price.split("\n")[0])
+                return float(price) / 100
         except Exception:
             self.logger.exception(
                 f"Failed to retrieve price for {self.item} on {self.url}"
@@ -264,12 +266,6 @@ class ShoppingBot(WebDriverSetup, LoggingClass):
     def get_product_name(self):
         """Returns the product item name on the makro page."""
         product_name = None
-        if "makro" in self.url.split(".")[1]:
-            import IPython
-
-            globals().update(locals())
-            IPython.embed(header="name")
-
         try:
             product_name = self.driver.title.split("|")[0].strip()
             assert isinstance(product_name, str) and product_name != ""
@@ -278,9 +274,8 @@ class ShoppingBot(WebDriverSetup, LoggingClass):
                 self.ids[self.url.split(".")[1]]["product_name"]
             ).text.split("\n")[0]
 
-        if (not product_name) or (self.item not in product_name.lower()) or (product_name.lower() in self.driver.current_url):
+        if (not product_name) or (product_name.lower() in self.driver.current_url):
             self.logger.error("Failed to get item name from class, and title")
-            import IPython; globals().update(locals()); IPython.embed(header='Python Debugger')
             product_name = "Not Available"
         return product_name
 
@@ -302,9 +297,9 @@ if __name__ == "__main__":
 
     for url in urls:
         try:
-            shopping_bot = ShoppingBot(items, url, ids, "INFO")
+            shopping_bot = ShoppingBot(items, url, ids, "FATAL")
             shopping_list = shopping_bot.search_items()
         except Exception:
             shopping_bot.close_session()
         else:
-            print(shopping_list, end="\n")
+            print(shopping_list, end="\n\n")
