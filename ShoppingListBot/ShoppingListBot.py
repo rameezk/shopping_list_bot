@@ -225,13 +225,12 @@ class ShoppingBot(WebDriverSetup, LoggingClass):
                 price = self.get_product_price()
                 current_url = self.get_current_url()
                 shop_name = self.url.split(".")[1].title()
-                # if name != "Not Available":
-                self.shopping_cart[shop_name].append(
-                    ShoppingList(
-                        item_name=name.title(), item_price=price, item_url=current_url
+                if name != "Not Available":
+                    self.shopping_cart[shop_name].append(
+                        ShoppingList(
+                            item_name=name.title(), item_price=price, item_url=current_url
+                        )
                     )
-                )
-                print (self.shopping_cart)
             except Exception:
                 self.logger.error("No Data Available")
         self.close_session()
@@ -307,14 +306,15 @@ if __name__ == "__main__":
 
     items = [
         "pampers pants",
-        # "self raising flour",
-        # "jungle oats 1kg"
+        "self raising flour",
+        "jungle oats 1kg"
     ]
-
+    shopping_carts = []
     for url in URLS:
         try:
             shopping_bot = ShoppingBot(items, url)
             shopping_bot.search_items()
-            import IPython; globals().update(locals()); IPython.embed(header='Python Debugger')
         except Exception:
             shopping_bot.close_session()
+        else:
+            shopping_carts.append(shopping_bot.shopping_cart)
