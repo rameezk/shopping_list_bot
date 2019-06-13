@@ -1,14 +1,11 @@
+import logging
+import coloredlogs
 import gspread
-import ShoppingListBot as shopping_bot
-from ShoppingListBot import LoggingClass
+import shopping_list_bot as shopping_bot
 from oauth2client.service_account import ServiceAccountCredentials
 
-import logging
 
-import coloredlogs
-
-
-class PriceUpdater(LoggingClass):
+class PriceUpdater(shopping_bot.LoggingClass):
     def __init__(self, spreadsheet_name, secrets_json, log_level="INFO"):
         self.secrets_json = secrets_json
         self.row_start = 2
@@ -38,27 +35,64 @@ class PriceUpdater(LoggingClass):
         }
 
     def get_all_product_name_coord(self, product_name="Product Name"):
+        """Summary
+
+        Args:
+            product_name (str, optional): Description
+
+        Returns:
+            TYPE: Description
+        """
         return [
             (coord.row + self.row_start, coord.col)
             for coord in self.sheet.findall(product_name)
         ]
 
     def get_all_price_coord(self, price="Price"):
+        """Summary
+
+        Args:
+            price (str, optional): Description
+
+        Returns:
+            TYPE: Description
+        """
         return [
             (coord.row + self.row_start, coord.col) for coord in self.sheet.findall(price)
         ]
 
     def get_all_url_coord(self, url="URL"):
+        """Summary
+
+        Args:
+            url (str, optional): Description
+
+        Returns:
+            TYPE: Description
+        """
         return [
             (coord.row + self.row_start, coord.col) for coord in self.sheet.findall(url)
         ]
 
     def get_all_items(self, items="Item"):
+        """Summary
+
+        Args:
+            items (str, optional): Description
+
+        Returns:
+            TYPE: Description
+        """
         items_coord = self.sheet.find(items)
         col, row = items_coord.col, items_coord.row
         return [item for item in self.sheet.col_values(col)[row:] if item]
 
     def get_shopping_cart(self):
+        """Summary
+
+        Returns:
+            TYPE: Description
+        """
         items = self.get_all_items()
         urls = shopping_bot.URLS
         shopping_carts = []
@@ -73,6 +107,8 @@ class PriceUpdater(LoggingClass):
         return shopping_carts
 
     def process_item_list(self):
+        """Summary
+        """
         list_of_shopping_carts = self.get_shopping_cart()
         available_stores_coord = self.get_all_stores()
         product_names_coord = self.get_all_product_name_coord()
@@ -105,6 +141,8 @@ class PriceUpdater(LoggingClass):
                             available_stores_coord.pop(shop_name, None)
 
     def update_spreadsheet_price(self):
+        """Summary
+        """
         # TODO
         # get urls from spreadsheet
         # for url in urls

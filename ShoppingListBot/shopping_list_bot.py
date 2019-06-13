@@ -3,17 +3,17 @@ import os
 import re
 import sys
 import time
-from collections import namedtuple, defaultdict
+from collections import defaultdict, namedtuple
 
 import coloredlogs
 from bs4 import BeautifulSoup
+
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
-
 
 __all__ = ["ShoppingBot"]
 
@@ -23,9 +23,9 @@ TIMEOUT = 30
 URLS = [
     "https://www.makro.co.za/",
     "https://www.game.co.za/",
-    # "https://www.pnp.co.za/",
-    # "https://www.woolworths.co.za/",
-    # "https://www.takealot.com/",
+    "https://www.pnp.co.za/",
+    "https://www.woolworths.co.za/",
+    "https://www.takealot.com/",
 ]
 
 IDS = {
@@ -304,11 +304,7 @@ class ShoppingBot(WebDriverSetup, LoggingClass):
 
 if __name__ == "__main__":
 
-    items = [
-        "pampers pants",
-        "self raising flour",
-        "jungle oats 1kg"
-    ]
+    items = ["pampers pants", "self raising flour", "jungle oats 1kg"]
     shopping_carts = []
     for url in URLS:
         try:
