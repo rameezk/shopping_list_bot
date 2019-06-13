@@ -6,6 +6,16 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 
 class PriceUpdater(shopping_bot.LoggingClass):
+
+    """Summary
+
+    Attributes:
+        row_start (int): Description
+        secrets_json (TYPE): Description
+        sheet (TYPE): Description
+        stores_row (int): Description
+    """
+
     def __init__(self, spreadsheet_name, secrets_json, log_level="INFO"):
         self.secrets_json = secrets_json
         self.row_start = 2
