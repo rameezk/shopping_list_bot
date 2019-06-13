@@ -3,7 +3,7 @@ import os
 import re
 import sys
 import time
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 
 import coloredlogs
 from bs4 import BeautifulSoup
@@ -14,12 +14,21 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
-Shopping_List = namedtuple(
-    "ShoppingList", ["shop_name", "item_name", "item_price", "item_url"]
-)
+
+__all__ = ["ShoppingBot"]
+
 
 TIMEOUT = 30
-ids = {
+
+URLS = [
+    "https://www.makro.co.za/",
+    "https://www.game.co.za/",
+    # "https://www.pnp.co.za/",
+    # "https://www.woolworths.co.za/",
+    # "https://www.takealot.com/",
+]
+
+IDS = {
     "makro": {
         "first_result_xpath": "/html/body/main/div[9]/div[3]/div/div[1]/div[3]/div[2]/div/div/div[2]/div[1]",
         "price_product": "product-ProductNamePrice",
@@ -73,6 +82,21 @@ ids = {
 }
 
 
+class ShoppingList:
+    def __init__(self, item_name, item_price, item_url):
+        self.item_name = item_name
+        self.item_price = item_price
+        self.item_url = item_url
+
+    def __repr__(self):
+        return "<%s.%s(item_name='%s') at 0x%x>" % (
+            self.__class__.__module__,
+            self.__class__.__name__,
+            self.item_name,
+            id(self),
+        )
+
+
 class LoggingClass:
     @property
     def logger(self):
@@ -86,7 +110,7 @@ class LoggingClass:
 
 
 class WebDriverSetup:
-    def __init__(self):
+    def __init__(self, url):
         self._timeout = TIMEOUT
         self._options = Options()
         self._options.headless = True
@@ -132,22 +156,22 @@ class ShoppingBot(WebDriverSetup, LoggingClass):
         price, name and url, in order to create a Google spreadsheet.
     """
 
-    def __init__(self, items, url, ids, log_level="INFO"):
+    def __init__(self, items, url="", ids=IDS, log_level="INFO"):
         assert isinstance(items, list)
         self.items = items
         assert isinstance(url, str)
         self.url = url
         assert isinstance(ids, dict)
         self.ids = ids
+        self.shopping_cart = defaultdict(list)
         self.item = None
         self.logger.setLevel(log_level.upper())
         coloredlogs.install(level=log_level.upper())
-        super().__init__()
+        super().__init__(url)
 
     def search_items(self):
         """Searches through the list of items obtained from spreadsheet and
         obtains name, price, and URL information for each item."""
-        shopping_list = []
         for count, self.item in enumerate(self.items, 1):
             self.driver.get(self.url)
             time.sleep(0.3)
@@ -200,22 +224,17 @@ class ShoppingBot(WebDriverSetup, LoggingClass):
                 name = self.get_product_name()
                 price = self.get_product_price()
                 current_url = self.get_current_url()
-
-                if name != "Not Available":
-                    shopping_list.append(
-                        Shopping_List(
-                            shop_name=self.url.split(".")[1],
-                            item_name=name.title(),
-                            item_price=price,
-                            item_url=current_url,
-                        )
+                shop_name = self.url.split(".")[1].title()
+                # if name != "Not Available":
+                self.shopping_cart[shop_name].append(
+                    ShoppingList(
+                        item_name=name.title(), item_price=price, item_url=current_url
                     )
-                    assert len(shopping_list) != 0 and isinstance(shopping_list, list)
+                )
+                print (self.shopping_cart)
             except Exception:
                 self.logger.error("No Data Available")
-
         self.close_session()
-        return shopping_list
 
     def get_current_url(self):
         current_url = self.driver.current_url
@@ -286,20 +305,16 @@ class ShoppingBot(WebDriverSetup, LoggingClass):
 
 if __name__ == "__main__":
 
-    items = ["pampers pants", "self raising flour", "jungle oats 1kg"]
-    urls = [
-        "https://www.makro.co.za/",
-        "https://www.game.co.za/",
-        "https://www.pnp.co.za/",
-        "https://www.woolworths.co.za/",
-        "https://www.takealot.com/",
+    items = [
+        "pampers pants",
+        # "self raising flour",
+        # "jungle oats 1kg"
     ]
 
-    for url in urls:
+    for url in URLS:
         try:
-            shopping_bot = ShoppingBot(items, url, ids, "FATAL")
-            shopping_list = shopping_bot.search_items()
+            shopping_bot = ShoppingBot(items, url)
+            shopping_bot.search_items()
+            import IPython; globals().update(locals()); IPython.embed(header='Python Debugger')
         except Exception:
             shopping_bot.close_session()
-        else:
-            print(shopping_list, end="\n\n")
