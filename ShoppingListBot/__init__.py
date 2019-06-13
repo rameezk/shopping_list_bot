@@ -1,1 +1,0 @@
-from .ShoppingListBot import *

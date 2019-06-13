@@ -6,17 +6,18 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 
 class PriceUpdater(shopping_bot.LoggingClass):
-
-    """Summary
-
-    Attributes:
-        row_start (int): Description
-        secrets_json (TYPE): Description
-        sheet (TYPE): Description
-        stores_row (int): Description
     """
+    Summary
+    """
+    def __init__(self, spreadsheet_name, secrets_json, share=[], log_level="INFO"):
+        """Summary
 
-    def __init__(self, spreadsheet_name, secrets_json, log_level="INFO"):
+        Args:
+            spreadsheet_name (TYPE): Description
+            secrets_json (TYPE): Description
+            share (list, optional): Description
+            log_level (str, optional): Description
+        """
         self.secrets_json = secrets_json
         self.row_start = 2
         self.stores_row = 2
@@ -33,10 +34,19 @@ class PriceUpdater(shopping_bot.LoggingClass):
         client = gspread.authorize(creds)
         self.sheet = client.open(spreadsheet_name).sheet1
         self.logger.info("Successfully opened spreadsheet: %s", spreadsheet_name)
+        if share:
+            for shared in share:
+                self.logger.info("Sharing the spreadsheet with %s", shared)
+                self.sheet.share(shared, perm_type='user', role='writer')
 
     def get_all_stores(self):
+        """Summary
+
+        Returns:
+            TYPE: Description
+        """
         return {
-            coord.value: (coord.row, coord.col)
+            coord.value.title(): (coord.row, coord.col)
             for coord in [
                 self.sheet.find(store_name)
                 for store_name in self.sheet.row_values(self.stores_row)
@@ -162,5 +172,9 @@ class PriceUpdater(shopping_bot.LoggingClass):
 
 
 if __name__ == "__main__":
-    price_updater = PriceUpdater("Shopping List", "client_secret.json")
+    import pathlib
+
+    client_secret = pathlib.Path('../.envs/client_secret.json').absolute()
+    spreadsheet_name = "Shopping List"
+    price_updater = PriceUpdater(spreadsheet_name, client_secret)
     price_updater.process_item_list()

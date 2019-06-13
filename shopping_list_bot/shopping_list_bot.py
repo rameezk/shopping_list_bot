@@ -3,7 +3,7 @@ import os
 import re
 import sys
 import time
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 
 import coloredlogs
 from bs4 import BeautifulSoup
@@ -14,8 +14,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
-
-__all__ = ["ShoppingBot"]
 
 
 TIMEOUT = 30
@@ -36,8 +34,6 @@ IDS = {
         "product_name": "name",
         "search_button_xpath": "/html/body/main/div[2]/div/div[2]/div/div/div[4]/div/div/div/div/div[2]/div/form/span[2]/a/i",
         "search_input_id": "js-site-search-input",
-        "url_shortner_pattern": "/p/",
-        "url_shortner_linker": "",
     },
     "game": {
         "first_result_xpath": "/html/body/main/div[3]/div[2]/div[2]/div/div/div/ul/div[1]/a/div",
@@ -46,8 +42,6 @@ IDS = {
         "product_name": "name",
         "search_button_xpath": "/html/body/main/header/nav[1]/div/div[2]/div[2]/div/div/div/form/div/span/button",
         "search_input_id": "js-site-search-input",
-        "url_shortner_pattern": "/p/",
-        "url_shortner_linker": "",
     },
     "pnp": {
         "first_result_xpath": "/html/body/main/div[4]/div[2]/div/div[1]/div[3]/div[2]/div[2]/div[1]/ul/div[1]/div/div[3]/a/div[1]",
@@ -56,8 +50,6 @@ IDS = {
         "product_name": "fed-pdp-product-details-title",
         "search_button_xpath": "/html/body/main/header/div[1]/div[2]/div/div[7]/div/form/div/span/button/span",
         "search_input_id": "js-site-search-input",
-        "url_shortner_pattern": "/p/",
-        "url_shortner_linker": "",
     },
     "woolworths": {
         "first_result_xpath": "/html/body/div/div/div/main/div/div/div/div[1]/div[1]/div[3]/div[1]/article/div[2]/a/h2",
@@ -66,8 +58,6 @@ IDS = {
         "product_name": "ffont-graphic heading--400 heading--sub no-wrap--ellipsis",
         "search_button_xpath": "/html/body/div/div/header/div[2]/div/section[3]/div/div/form/input[3]",
         "search_input_id": "fldSearch",
-        "url_shortner_pattern": "_/",
-        "url_shortner_linker": "prod/",
     },
     "takealot": {
         "first_result_xpath": '//*[@id="pos_link_0"]',
@@ -76,8 +66,6 @@ IDS = {
         "product_name": "product-title",
         "search_button_xpath": "/html/body/div[3]/div/div[2]/form/fieldset/input[5]",
         "search_input_id": "search",
-        "url_shortner_pattern": "/",
-        "url_shortner_linker": "",
     },
 }
 
@@ -89,11 +77,9 @@ class ShoppingList:
         self.item_url = item_url
 
     def __repr__(self):
-        return "<%s.%s(item_name='%s') at 0x%x>" % (
-            self.__class__.__module__,
-            self.__class__.__name__,
-            self.item_name,
-            id(self),
+        return "<%s.%s(item_name='%s', item_price='%s') at 0x%x>" % (
+            self.__class__.__module__, self.__class__.__name__, self.item_name,
+            self.item_price, id(self),
         )
 
 
@@ -121,14 +107,14 @@ class WebDriverSetup:
         )
 
         if self._options.headless:
-            self.logger.info("Headless Firefox Initialized")
+            self.logger.info("Headless Firefox Initialized.")
 
         try:
             # Navigate to the makro URL.
-            self.logger.info(f"Navigating to {url}")
+            self.logger.info(f"Navigating to {url}.")
             self.driver.get(url)
         except TimeoutException:
-            self.logger.exception("Timeout loading page")
+            self.logger.exception("Timed-out while loading page.")
             self.close_session()
             sys.exit(1)
         else:
@@ -152,8 +138,15 @@ class WebDriverSetup:
 
 class ShoppingBot(WebDriverSetup, LoggingClass):
     """
-        Selenium bot that searches makro website for items defined in a file and gets the
-        price, name and url, in order to create a Google spreadsheet.
+    Selenium bot that searches makro website for items defined in a file and gets the
+    price, name and url, in order to create a Google spreadsheet.
+
+    Attributes:
+        ids (TYPE): Description
+        item (TYPE): Description
+        items (TYPE): Description
+        shopping_cart (TYPE): Description
+        url (TYPE): Description
     """
 
     def __init__(self, items, url="", ids=IDS, log_level="INFO"):
@@ -185,7 +178,7 @@ class ShoppingBot(WebDriverSetup, LoggingClass):
                     EC.presence_of_element_located((By.ID, search_input_id))
                 )
             except Exception:
-                self.logger.error("No Data Available")
+                self.logger.error(f"Could not insert {self.item} to the search bar.")
             else:
                 search_input = self.driver.find_element_by_id(search_input_id)
                 search_input.send_keys(self.item)
@@ -199,7 +192,7 @@ class ShoppingBot(WebDriverSetup, LoggingClass):
                     EC.presence_of_element_located((By.XPATH, search_button_xpath))
                 )
             except Exception:
-                self.logger.error("No Data Available")
+                self.logger.error(f"Could not search for {self.item}.")
             else:
                 search_button = self.driver.find_element_by_xpath(search_button_xpath)
                 search_button.click()
@@ -213,37 +206,29 @@ class ShoppingBot(WebDriverSetup, LoggingClass):
                 first_res = WebDriverWait(self.driver, self._timeout).until(
                     EC.presence_of_element_located((By.XPATH, first_result_xpath))
                 )
-            except Exception:
-                self.logger.error("No Data Available")
+            except Exception as error:
+                self.logger.error(f"No Data Available due to {error}")
             else:
                 first_res = self.driver.find_element_by_xpath(first_result_xpath)
                 first_res.click()
                 time.sleep(0.5)
 
-            try:
-                name = self.get_product_name()
+            name = self.get_product_name()
+            if name == "Not Available":
+                name = None
+                price = None
+                current_url = None
+            else:
                 price = self.get_product_price()
-                current_url = self.get_current_url()
-                shop_name = self.url.split(".")[1].title()
-                if name != "Not Available":
-                    self.shopping_cart[shop_name].append(
-                        ShoppingList(
-                            item_name=name.title(), item_price=price, item_url=current_url
-                        )
-                    )
-            except Exception:
-                self.logger.error("No Data Available")
-        self.close_session()
+                current_url = self.driver.current_url
 
-    def get_current_url(self):
-        current_url = self.driver.current_url
-        url_pattern = self.ids[self.url.split(".")[1]]["url_shortner_pattern"]
-        linker = self.ids[self.url.split(".")[1]]["url_shortner_linker"]
-        if url_pattern in current_url:
-            current_url = (
-                self.url + linker + url_pattern + current_url.split(url_pattern)[-1]
+            shop_name = self.url.split(".")[1].title()
+            self.shopping_cart[shop_name].append(
+                ShoppingList(
+                    item_name=name, item_price=price, item_url=current_url
+                )
             )
-        return current_url
+        self.close_session()
 
     def get_product_price(self):
         """Gets and cleans product item price on the makro page."""
@@ -293,12 +278,13 @@ class ShoppingBot(WebDriverSetup, LoggingClass):
             ).text.split("\n")[0]
 
         if (not product_name) or (product_name.lower() in self.driver.current_url):
-            self.logger.error("Failed to get item name from class, and title")
+            self.logger.error(f"Failed to get {self.item} product name.")
             product_name = "Not Available"
-        return product_name
+        return product_name.title()
 
     def close_session(self):
         """Close the browser session."""
+        self.logger.info(f"Successfully closed {self.driver.current_url}!!!")
         self.driver.close()
 
 
