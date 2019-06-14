@@ -49,11 +49,18 @@ def main():
     if args.get('shared', False):
         email_list.append(args.get('shared'))
 
+    headless = True
+    if args.get('log_level', "INFO"):
+        log_level = args.get('log_level', "INFO")
+        headless = False
+
+
     price_updater = PriceUpdater(
         spreadsheet_name=args.get("spreadsheet_name"),
         secrets_json=client_secret,
         share=email_list,
-        log_level=args.get('log_level')
+        log_level=log_level,
+        headless=headless
     )
 
     if args.get("update_spreadsheet",False):
