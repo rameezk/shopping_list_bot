@@ -9,7 +9,7 @@ class PriceUpdater(shopping_bot.LoggingClass):
     """
     Summary
     """
-    def __init__(self, spreadsheet_name, secrets_json, share=[], log_level="INFO"):
+    def __init__(self, spreadsheet_name, secrets_json, share=[], log_level="INFO", headless=True):
         """Summary
 
         Args:
@@ -17,8 +17,10 @@ class PriceUpdater(shopping_bot.LoggingClass):
             secrets_json (TYPE): Description
             share (list, optional): Description
             log_level (str, optional): Description
+            headless (bool, optional): Description
         """
         self.secrets_json = secrets_json
+        self.headless = headless
         self.row_start = 2
         self.stores_row = 2
 
@@ -120,7 +122,7 @@ class PriceUpdater(shopping_bot.LoggingClass):
         shopping_carts = []
         self.logger.info(f"[Attempting] to retrieve product information.")
         for url in urls:
-            crawling_bot = shopping_bot.ShoppingBot(items, url)
+            crawling_bot = shopping_bot.ShoppingBot(items, url, headless=self.headless)
             crawling_bot.search_items()
             shopping_carts.append(crawling_bot.shopping_cart)
         self.logger.info(

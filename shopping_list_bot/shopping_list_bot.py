@@ -96,10 +96,10 @@ class LoggingClass:
 
 
 class WebDriverSetup:
-    def __init__(self, url):
+    def __init__(self, url, headless):
         self._timeout = TIMEOUT
         self._options = Options()
-        self._options.headless = True
+        self._options.headless = headless
         self._profile = self._disable_Images_Firefox_Profile()
 
         self.driver = webdriver.Firefox(
@@ -149,7 +149,7 @@ class ShoppingBot(WebDriverSetup, LoggingClass):
         url (TYPE): Description
     """
 
-    def __init__(self, items, url="", ids=IDS, log_level="INFO"):
+    def __init__(self, items, url="", ids=IDS, log_level="INFO", headless=True):
         assert isinstance(items, list)
         self.items = items
         assert isinstance(url, str)
@@ -160,7 +160,7 @@ class ShoppingBot(WebDriverSetup, LoggingClass):
         self.item = None
         self.logger.setLevel(log_level.upper())
         coloredlogs.install(level=log_level.upper())
-        super().__init__(url)
+        super().__init__(url, headless)
 
     def search_items(self):
         """Searches through the list of items obtained from spreadsheet and
@@ -240,11 +240,19 @@ class ShoppingBot(WebDriverSetup, LoggingClass):
             time.sleep(0.5)
             assert isinstance(price, str) and price != ""
         except Exception:
-            self.logger.debug(f"{self.item} is not on promotion, getting normal price")
+            self.logger.debug(f"{self.item} is not on promotion, getting normal price.")
             time.sleep(0.5)
-            price = self.driver.find_element_by_class_name(
-                self.ids[self.url.split(".")[1]]["price_product"]
-            ).text
+            prod_price = self.ids[self.url.split(".")[1]]["price_product"]
+            try:
+                price = WebDriverWait(self.driver, self._timeout).until(
+                    EC.presence_of_element_located((By.CLASS_NAME, prod_price))
+                )
+            except Exception:
+                self.logger.exception(
+                    f"Price information for {self.item} could not be retrieved.")
+                return
+            else:
+                price = self.driver.find_element_by_class_name(prod_price).text
 
         try:
             time.sleep(0.2)
@@ -264,7 +272,7 @@ class ShoppingBot(WebDriverSetup, LoggingClass):
             self.logger.exception(
                 f"Failed to retrieve price for {self.item} on {self.url}"
             )
-            return "Not available"
+            return
 
     def get_product_name(self):
         """Returns the product item name on the makro page."""

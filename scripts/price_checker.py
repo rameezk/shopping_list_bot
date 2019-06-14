@@ -49,10 +49,12 @@ def main():
     if args.get('shared', False):
         email_list.append(args.get('shared'))
 
-    headless = True
-    if args.get('log_level', "INFO"):
-        log_level = args.get('log_level', "INFO")
+    if args.get('log_level', "INFO").lower() == 'debug':
+        log_level = "DEBUG"
         headless = False
+    else:
+        log_level = args.get('log_level', "INFO")
+        headless = True
 
 
     price_updater = PriceUpdater(
