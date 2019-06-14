@@ -11,9 +11,11 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
+
 
 
 TIMEOUT = 30
@@ -182,21 +184,7 @@ class ShoppingBot(WebDriverSetup, LoggingClass):
             else:
                 search_input = self.driver.find_element_by_id(search_input_id)
                 search_input.send_keys(self.item)
-
-            try:
-                search_button_xpath = self.ids[self.url.split(".")[1]][
-                    "search_button_xpath"
-                ]
-                self.logger.debug("Clicking on search button, using xpath")
-                search_button = WebDriverWait(self.driver, self._timeout).until(
-                    EC.presence_of_element_located((By.XPATH, search_button_xpath))
-                )
-            except Exception:
-                self.logger.error(f"Could not search for {self.item}.")
-            else:
-                search_button = self.driver.find_element_by_xpath(search_button_xpath)
-                search_button.click()
-                time.sleep(0.5)
+                search_input.send_keys(Keys.RETURN)
 
             try:
                 self.logger.debug("Selecting first result and open link, using xpath")
