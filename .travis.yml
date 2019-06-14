@@ -3,6 +3,11 @@ language: python
 # sudo false implies containerized builds
 sudo: false
 
+env:
+  - MOZ_HEADLESS=1
+addons:
+  firefox: latest
+
 python:
   - 3.6
 
