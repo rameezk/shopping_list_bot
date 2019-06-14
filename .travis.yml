@@ -3,6 +3,9 @@ language: python
 # sudo false implies containerized builds
 sudo: false
 
+notifications:
+  email: change
+
 env:
   - MOZ_HEADLESS=1
 
