@@ -27,5 +27,25 @@ class MakroBot(unittest.TestCase):
     def tearDown(self):
         self.driver.close()
 
+
+class GameBot(unittest.TestCase):
+
+    def setUp(self):
+        self._options = Options()
+        self._options.headless = False
+        self.driver = webdriver.Firefox(options=self._options, timeout=30)
+
+    def test_search(self):
+        driver = self.driver
+        driver.get("https://www.game.co.za/")
+        self.assertIn("Game", driver.title)
+        elem = driver.find_element_by_id("js-site-search-input")
+        elem.send_keys("beer")
+        elem.send_keys(Keys.RETURN)
+        assert "No results found." not in driver.page_source
+
+    def tearDown(self):
+        self.driver.close()
+
 if __name__ == "__main__":
     unittest.main()
