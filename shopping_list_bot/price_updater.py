@@ -9,7 +9,10 @@ class PriceUpdater(shopping_bot.LoggingClass):
     """
     Summary
     """
-    def __init__(self, spreadsheet_name, secrets_json, share=[], log_level="INFO", headless=True):
+
+    def __init__(
+        self, spreadsheet_name, secrets_json, share=[], log_level="INFO", headless=True
+    ):
         """Summary
 
         Args:
@@ -38,7 +41,7 @@ class PriceUpdater(shopping_bot.LoggingClass):
         if share:
             for shared in share:
                 self.logger.info("Sharing the spreadsheet with '%s'", shared)
-                sheet.share(shared, perm_type='user', role='writer')
+                sheet.share(shared, perm_type="user", role="writer")
 
         self.sheet = sheet.sheet1
         self.logger.info("Successfully opened spreadsheet: %s", spreadsheet_name)
@@ -123,7 +126,9 @@ class PriceUpdater(shopping_bot.LoggingClass):
         self.logger.info(f"[Attempting] to retrieve product information.")
         for url in urls:
             try:
-                crawling_bot = shopping_bot.ShoppingBot(items, url, headless=self.headless)
+                crawling_bot = shopping_bot.ShoppingBot(
+                    items, url, headless=self.headless
+                )
                 crawling_bot.search_items()
                 shopping_carts.append(crawling_bot.shopping_cart)
                 self.logger.info(
@@ -181,7 +186,7 @@ class PriceUpdater(shopping_bot.LoggingClass):
 if __name__ == "__main__":
     import pathlib
 
-    client_secret = pathlib.Path('../.envs/client_secret.json').absolute()
+    client_secret = pathlib.Path("../.envs/client_secret.json").absolute()
     spreadsheet_name = "Shopping List"
     price_updater = PriceUpdater(spreadsheet_name, client_secret)
     price_updater.process_item_list()

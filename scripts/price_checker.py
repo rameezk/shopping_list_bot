@@ -46,26 +46,25 @@ def main():
     if not client_secret.is_file():
         exit(f"File: {client_secret} could not be found!!!")
 
-    if args.get('shared', False):
-        email_list.append(args.get('shared'))
+    if args.get("shared", False):
+        email_list.append(args.get("shared"))
 
-    if args.get('log_level', "INFO").lower() == 'debug':
+    if args.get("log_level", "INFO").lower() == "debug":
         log_level = "DEBUG"
         headless = False
     else:
-        log_level = args.get('log_level', "INFO")
+        log_level = args.get("log_level", "INFO")
         headless = True
-
 
     price_updater = PriceUpdater(
         spreadsheet_name=args.get("spreadsheet_name"),
         secrets_json=client_secret,
         share=email_list,
         log_level=log_level,
-        headless=headless
+        headless=headless,
     )
 
-    if args.get("update_spreadsheet",False):
+    if args.get("update_spreadsheet", False):
         price_updater.update_spreadsheet()
     else:
         price_updater.process_item_list()

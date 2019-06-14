@@ -9,7 +9,6 @@ from selenium.webdriver.common.keys import Keys
 
 
 class MakroBot(unittest.TestCase):
-
     def setUp(self):
         self._options = Options()
         self._options.headless = True
@@ -29,7 +28,6 @@ class MakroBot(unittest.TestCase):
 
 
 class GameBot(unittest.TestCase):
-
     def setUp(self):
         self._options = Options()
         self._options.headless = False
@@ -46,6 +44,7 @@ class GameBot(unittest.TestCase):
 
     def tearDown(self):
         self.driver.close()
+
 
 if __name__ == "__main__":
     unittest.main()

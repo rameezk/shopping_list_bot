@@ -1,4 +1,5 @@
 import logging
+import random
 import os
 import re
 import sys
@@ -17,13 +18,12 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
 
-
 TIMEOUT = 30
 
 URLS = [
-    "https://www.makro.co.za/",
-    "https://www.game.co.za/",
-    "https://www.pnp.co.za/",
+    # "https://www.makro.co.za/",
+    # "https://www.game.co.za/",
+    # "https://www.pnp.co.za/",
     "https://www.woolworths.co.za/",
     "https://www.takealot.com/",
 ]
@@ -64,7 +64,7 @@ IDS = {
     "takealot": {
         "first_result_xpath": '//*[@id="pos_link_0"]',
         "price_product": "sf-price",
-        "price_promotion": "sf-price",
+        "price_promotion": "buybox-module_price_2YUFa",
         "product_name": "product-title",
         "search_button_xpath": "/html/body/div[3]/div/div[2]/form/fieldset/input[5]",
         "search_input_id": "search",
@@ -80,8 +80,11 @@ class ShoppingList:
 
     def __repr__(self):
         return "<%s.%s(item_name='%s', item_price='%s') at 0x%x>" % (
-            self.__class__.__module__, self.__class__.__name__, self.item_name,
-            self.item_price, id(self),
+            self.__class__.__module__,
+            self.__class__.__name__,
+            self.item_name,
+            self.item_price,
+            id(self),
         )
 
 
@@ -184,9 +187,13 @@ class ShoppingBot(WebDriverSetup, LoggingClass):
             else:
                 search_input = self.driver.find_element_by_id(search_input_id)
                 search_input.send_keys(self.item)
+                self.logger.info(f"Searching for {self.item}.")
                 search_input.send_keys(Keys.RETURN)
 
+
             try:
+                if "woolworths" in self.url:
+                    assert "couldn't find anything" not in self.driver.page_source
                 self.logger.debug("Selecting first result and open link, using xpath")
                 first_result_xpath = self.ids[self.url.split(".")[1]][
                     "first_result_xpath"
@@ -194,8 +201,8 @@ class ShoppingBot(WebDriverSetup, LoggingClass):
                 first_res = WebDriverWait(self.driver, self._timeout).until(
                     EC.presence_of_element_located((By.XPATH, first_result_xpath))
                 )
-            except Exception as error:
-                self.logger.error(f"No Data Available due to {error}")
+            except Exception:
+                self.logger.error("No Data Available")
             else:
                 first_res = self.driver.find_element_by_xpath(first_result_xpath)
                 first_res.click()
@@ -212,9 +219,7 @@ class ShoppingBot(WebDriverSetup, LoggingClass):
 
             shop_name = self.url.split(".")[1].title()
             self.shopping_cart[shop_name].append(
-                ShoppingList(
-                    item_name=name, item_price=price, item_url=current_url
-                )
+                ShoppingList(item_name=name, item_price=price, item_url=current_url)
             )
         self.close_session()
 
@@ -236,8 +241,9 @@ class ShoppingBot(WebDriverSetup, LoggingClass):
                     EC.presence_of_element_located((By.CLASS_NAME, prod_price))
                 )
             except Exception:
-                self.logger.exception(
-                    f"Price information for {self.item} could not be retrieved.")
+                self.logger.error(
+                    f"Price information for {self.item} could not be retrieved."
+                )
                 return
             else:
                 price = self.driver.find_element_by_class_name(prod_price).text
