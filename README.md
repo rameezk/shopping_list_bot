@@ -6,9 +6,9 @@
 ## The Story
 Due to the [high rate of inflation](https://tradingeconomics.com/south-africa/inflation-cpi), [buying monthly groceries has become a sport](https://www.thesouthafrican.com/lifestyle/south-african-food-prices-now-more-expensive-than-the-uk/). One has to go to the ends of the world in order to good prices on the
 items they need.
-When doing a monthly grocery list one has to go through countless catalogues or websites to track down good prices or promotions, and that to me is very time consuming.
+When creating a monthly grocery list one has to go through countless catalogues or websites to find good prices or promotions, and that is time-consuming.
 
-Overtime I started to get annoyed and decided to create a Python script that
+Over time I started to get annoyed and decided to create a Python script that
 would search for the items I have listed in a Google spreadsheet across some
 of the major online shops in the country (South Africa). The script opens
 various websites (Using [Selenium](https://selenium-python.readthedocs.io/)), searches for the items listed, gets the current prices and correct item name and then uploads the data to a Google Spreadsheet.
@@ -27,6 +27,8 @@ Pretty straight forward.
 
 3. Now install:
     `pip install . -U`
+
+4. Upload the [spreadsheet](docs/Shopping_List.xlsx) to GDrive or [GSpeadsheet](https://docs.google.com/spreadsheets), and edit column 2 [Items]
 
 ## Usage
 
