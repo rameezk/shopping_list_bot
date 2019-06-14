@@ -4,7 +4,7 @@
 ![GitHub](https://img.shields.io/github/license/mmphego/shopping_list_bot.svg)
 
 ## The Story
-Due to the high rate of inflation, buying monthly groceries has become a sport. One has to go to the ends of the world in order to good prices on the
+Due to the [high rate of inflation](https://tradingeconomics.com/south-africa/inflation-cpi), [buying monthly groceries has become a sport](https://www.thesouthafrican.com/lifestyle/south-african-food-prices-now-more-expensive-than-the-uk/). One has to go to the ends of the world in order to good prices on the
 items they need.
 When doing a monthly grocery list one has to go through countless catalogues or websites to track down good prices or promotions, and that to me is very time consuming.
 
