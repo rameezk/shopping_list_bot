@@ -28,7 +28,7 @@ Pretty straight forward.
 3. Now install:
     `pip install . -U`
 
-4. Upload the [spreadsheet](docs/Shopping_List.xlsx) to GDrive or [GSpeadsheet](https://docs.google.com/spreadsheets), and edit column 2 [Items]
+4. Upload the [spreadsheet](docs/Shopping_List.xlsx) to GDrive or [GSpeadsheet](https://docs.google.com/spreadsheets), and insert your items into column 2 [ **Items** ]
 
 ## Usage
 
