@@ -6,6 +6,13 @@ sudo: false
 python:
   - 3.6
 
+before_install:
+    - pip install -U requests \
+                    selenium \
+                    beautifulsoup4 \
+                    oauth2client \
+                    gspread \
+                    coloredlogs
 install:
     - python setup.py install
 script:
