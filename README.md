@@ -8,7 +8,12 @@
 
 ## {{ INSTALLATION }}
 
-```wget https://github.com/mozilla/geckodriver/releases/download/v0.24.0/geckodriver-v0.24.0-linux64.tar.gz```
+
+
+*   Download [geckodriver](https://github.com/mozilla/geckodriver)
+    -   ```wget https://github.com/mozilla/geckodriver/releases/download/v0.24.0/geckodriver-v0.24.0-linux64.tar.gz```
+    -   Extract: ```tar -xvzf geckodriver-v0.24.0-linux64.tar.gz```
+*   Copy `geckodriver` to /usr/local/bin
 
 python setup.py install
 

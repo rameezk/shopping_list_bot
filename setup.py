@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Note: To use the 'upload' functionality of this file, you must:
-#   $ pip install twine --dev
-
 import io
 import os
 import sys
@@ -11,24 +8,18 @@ from shutil import rmtree
 
 from setuptools import Command, find_packages, setup
 
+here = os.path.abspath(os.path.dirname(__file__))
+
 # Package meta-data.
-NAME = "Shopping List Bot"
+NAME = "shopping list bot"
 DESCRIPTION = "Automated shopping list creator."
 URL = "https://github.com/mmphego/shopping_list_bot"
 EMAIL = "mpho112@gmail.com"
 AUTHOR = "Mpho Mphego"
 REQUIRES_PYTHON = ">=3.6.0"
-VERSION = "0.0.1"
-
+VERSION = "0.0.4"
 REQUIRED = ["requests", "selenium", "beautifulsoup4"]
 
-# optional
-EXTRAS = {}
-
-here = os.path.abspath(os.path.dirname(__file__))
-
-# Import the README and use it as the long-description.
-# Note: this will only work if 'README.md' is present in your MANIFEST.in file!
 try:
     with io.open(os.path.join(here, "README.md"), encoding="utf-8") as f:
         long_description = "\n" + f.read()
@@ -43,6 +34,11 @@ if not VERSION:
         exec(f.read(), about)
 else:
     about["__version__"] = VERSION
+
+SCRIPTS = []
+for dirname, dirnames, filenames in os.walk("scripts"):
+    for filename in filenames:
+        SCRIPTS.append(os.path.join(dirname, filename))
 
 
 class UploadCommand(Command):
@@ -101,12 +97,9 @@ setup(
     python_requires=REQUIRES_PYTHON,
     url=URL,
     packages=find_packages(exclude=["tests", "*.tests", "*.tests.*", "tests.*"]),
-    # entry_points={
-    #     'console_scripts': ['mycli=mymodule:cli'],
-    # },
     install_requires=REQUIRED,
-    extras_require=EXTRAS,
     include_package_data=True,
+    scripts=SCRIPTS,
     license="MIT",
     classifiers=[
         "License :: OSI Approved :: MIT License",
@@ -114,6 +107,12 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.6",
     ],
+    project_urls={
+        "Bug Reports": f"{URL}/issues",
+        "Source": URL,
+        "Say Thanks!": f"https://saythanks.io/to/mmphego",
+        "AboutMe": "https://blog.mphomphego.co.za/aboutme",
+    },
     # $ setup.py publish support.
     cmdclass={"upload": UploadCommand},
 )

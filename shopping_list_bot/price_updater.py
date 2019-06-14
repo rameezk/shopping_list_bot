@@ -32,12 +32,14 @@ class PriceUpdater(shopping_bot.LoggingClass):
 
         creds = ServiceAccountCredentials.from_json_keyfile_name(self.secrets_json, scope)
         client = gspread.authorize(creds)
-        self.sheet = client.open(spreadsheet_name).sheet1
-        self.logger.info("Successfully opened spreadsheet: %s", spreadsheet_name)
+        sheet = client.open(spreadsheet_name)
         if share:
             for shared in share:
-                self.logger.info("Sharing the spreadsheet with %s", shared)
-                self.sheet.share(shared, perm_type='user', role='writer')
+                self.logger.info("Sharing the spreadsheet with '%s'", shared)
+                sheet.share(shared, perm_type='user', role='writer')
+
+        self.sheet = sheet.sheet1
+        self.logger.info("Successfully opened spreadsheet: %s", spreadsheet_name)
 
     def get_all_stores(self):
         """Summary
