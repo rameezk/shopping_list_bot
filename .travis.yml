@@ -17,9 +17,10 @@ before_install:
                     beautifulsoup4 \
                     oauth2client \
                     gspread \
-                    coloredlogs
+                    coloredlogs \
+                    pytest
 install:
     - python setup.py install
 script:
-    - echo "Tests go here"
+    - pytest
 
