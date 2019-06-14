@@ -1,7 +1,8 @@
 # Shopping List Bot
 
 [![Build Status](https://travis-ci.com/mmphego/shopping_list_bot.svg?branch=master)](https://travis-ci.com/mmphego/shopping_list_bot)
-![GitHub](https://img.shields.io/github/license/mmphego/shopping_list_bot.svg)
+![GitHub](https://img.shields.io/github/license/mmphego/shopping_list_bot.svg?style=flat-square)
+-----------------------------------------------------------
 
 ## The Story
 Due to the [high rate of inflation](https://tradingeconomics.com/south-africa/inflation-cpi), [buying monthly groceries has become a sport](https://www.thesouthafrican.com/lifestyle/south-african-food-prices-now-more-expensive-than-the-uk/). One has to go to the ends of the world in order to good prices on the
