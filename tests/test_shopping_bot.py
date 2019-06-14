@@ -12,7 +12,7 @@ class MakroBot(unittest.TestCase):
 
     def setUp(self):
         self._options = Options()
-        self._options.headless = False
+        self._options.headless = True
         self.driver = webdriver.Firefox(options=self._options, timeout=30)
 
     def test_search(self):
