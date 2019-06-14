@@ -18,7 +18,14 @@ EMAIL = "mpho112@gmail.com"
 AUTHOR = "Mpho Mphego"
 REQUIRES_PYTHON = ">=3.6.0"
 VERSION = "0.0.4"
-REQUIRED = ["requests", "selenium", "beautifulsoup4"]
+REQUIRED = [
+    "requests",
+    "selenium",
+    "beautifulsoup4",
+    "oauth2client",
+    "gspread",
+    "coloredlogs",
+]
 
 try:
     with io.open(os.path.join(here, "README.md"), encoding="utf-8") as f:

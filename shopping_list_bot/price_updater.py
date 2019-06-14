@@ -122,12 +122,15 @@ class PriceUpdater(shopping_bot.LoggingClass):
         shopping_carts = []
         self.logger.info(f"[Attempting] to retrieve product information.")
         for url in urls:
-            crawling_bot = shopping_bot.ShoppingBot(items, url, headless=self.headless)
-            crawling_bot.search_items()
-            shopping_carts.append(crawling_bot.shopping_cart)
-        self.logger.info(
-            f"[Done] Retrieving product information from {crawling_bot.__class__}"
-        )
+            try:
+                crawling_bot = shopping_bot.ShoppingBot(items, url, headless=self.headless)
+                crawling_bot.search_items()
+                shopping_carts.append(crawling_bot.shopping_cart)
+                self.logger.info(
+                    f"[Done] Retrieving product information from {crawling_bot.__class__}"
+                )
+            except Exception as error:
+                self.logger.error(f"Failed to retrieve {url} due to {error}.")
         return shopping_carts
 
     def process_item_list(self):

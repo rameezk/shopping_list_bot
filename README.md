@@ -3,19 +3,29 @@
 [![Build Status](https://travis-ci.com/mmphego/shopping_list_bot.svg?branch=master)](https://travis-ci.com/mmphego/shopping_list_bot)
 ![GitHub](https://img.shields.io/github/license/mmphego/shopping_list_bot.svg)
 
-## {{ STORY GOES HERE}}
+## The Story
+Due to the high rate of inflation, buying monthly groceries has become a sport. One has to go to the ends of the world in order to good prices on the
+items they need.
+When doing a monthly grocery list one has to go through countless catalogues or websites to track down good prices or promotions, and that to me is very time consuming.
 
+Overtime I started to get annoyed and decided to create a Python script that
+would search for the items I have listed in a Google spreadsheet across some
+of the major online shops in the country (South Africa). The script opens
+various websites (Using [Selenium](https://selenium-python.readthedocs.io/)), searches for the items listed, gets the current prices and correct item name and then uploads the data to a Google Spreadsheet.
+Pretty straight forward.
 
 ## Installation
 
-Before you install ensure that `geckodrive` for Firefox is installed.
+1. Obtain Google API for authentication:
+    *   Follow the instructions [here](https://gspread.readthedocs.io/en/latest/oauth2.html#oauth-credentials)
 
-*   Download [geckodriver](https://github.com/mozilla/geckodriver)
-    -   ```wget https://github.com/mozilla/geckodriver/releases/download/v0.24.0/geckodriver-v0.24.0-linux64.tar.gz```
-    -   Extract: ```tar -xvzf geckodriver-v0.24.0-linux64.tar.gz```
-*   Copy `geckodriver` to /usr/local/bin
+2. Before you install ensure that `geckodrive` for Firefox is installed.
+    *   Download [geckodriver](https://github.com/mozilla/geckodriver)
+        *   ```wget https://github.com/mozilla/geckodriver/releases/download/v0.24.0/geckodriver-v0.24.0-linux64.tar.gz```
+        *   Extract: ```tar -xvzf geckodriver-v0.24.0-linux64.tar.gz```
+    *   Copy `geckodriver` to /usr/local/bin
 
-Now install:
+3. Now install:
     `pip install . -U`
 
 ## Usage
