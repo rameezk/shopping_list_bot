@@ -21,9 +21,9 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 TIMEOUT = 30
 
 URLS = [
-    # "https://www.makro.co.za/",
-    # "https://www.game.co.za/",
-    # "https://www.pnp.co.za/",
+    "https://www.makro.co.za/",
+    "https://www.game.co.za/",
+    "https://www.pnp.co.za/",
     "https://www.woolworths.co.za/",
     "https://www.takealot.com/",
 ]
