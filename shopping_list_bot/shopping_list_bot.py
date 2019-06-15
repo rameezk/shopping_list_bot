@@ -187,7 +187,7 @@ class ShoppingBot(WebDriverSetup, LoggingClass):
             else:
                 search_input = self.driver.find_element_by_id(search_input_id)
                 search_input.send_keys(self.item)
-                self.logger.info(f"Searching for {self.item}.")
+                self.logger.info(f"Now searching for {self.item}.")
                 search_input.send_keys(Keys.RETURN)
 
 
@@ -214,6 +214,8 @@ class ShoppingBot(WebDriverSetup, LoggingClass):
                 price = None
                 current_url = None
             else:
+                self.logger.info(
+                    f"Found {self.item} with product name: {name} on {self.url}.")
                 price = self.get_product_price()
                 current_url = self.driver.current_url
 

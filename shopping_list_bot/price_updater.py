@@ -1,6 +1,7 @@
 import logging
 import coloredlogs
 import gspread
+import time
 import shopping_list_bot as shopping_bot
 from oauth2client.service_account import ServiceAccountCredentials
 
@@ -170,6 +171,7 @@ class PriceUpdater(shopping_bot.LoggingClass):
                                     prod_coord[1] + 2,
                                     cart.item_url,
                                 )
+                                time.sleep(10)
                             available_stores_coord.pop(shop_name, None)
 
     def update_spreadsheet_price(self):
