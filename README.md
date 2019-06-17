@@ -24,10 +24,10 @@ Pretty straight forward.
     *   Download [geckodriver](https://github.com/mozilla/geckodriver)
         *   ```wget https://github.com/mozilla/geckodriver/releases/download/v0.24.0/geckodriver-v0.24.0-linux64.tar.gz```
         *   Extract: ```tar -xvzf geckodriver-v0.24.0-linux64.tar.gz```
-    *   Copy `geckodriver` to /usr/local/bin
+    *   `sudo cp geckodriver /usr/local/bin`
 
 3. Now install:
-    `pip install . -U`
+    *   `pip install . -U`
 
 4. Upload the [spreadsheet](docs/Shopping_List.xlsx) to GDrive or [GSpeadsheet](https://docs.google.com/spreadsheets), and insert your items into column 2 [ **Items** ]
 
